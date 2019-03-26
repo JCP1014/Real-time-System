@@ -28,17 +28,18 @@ int main()
     struct processor p[m];
     struct task t[n];
     vector<struct task> q; // waiting queue
-    int currTime = 0;   
+    int currTime = 0;
     int currTask = -1;
-    vector<int> restTask;   // tasks that haven't released
-    int shortest = 0;   // id of the shortest task in the waiting queue
-    bool isSwitch = false;  // context switch
-    bool isFirst = true;    // first task
+    vector<int> restTask;  // tasks that haven't released
+    int shortest = 0;      // id of the shortest task in the waiting queue
+    bool isChange = false; // change current task
+    bool isFirst = true;   // first task
     vector<int> waitingTime;
-    double hit = 0; // number of tasks whose finish time <= deadline
-    vector<int> copyExec;   // store the original execution time
+    double hit = 0;       // number of tasks whose finish time <= deadline
+    vector<int> copyExec; // store the original execution time
+    bool isEnd = false;
 
-    // Read input 
+    // Read input
     for (int i = 0; i < m; i++)
     {
         cin >> p[i].id >> p[i].ability;
@@ -51,7 +52,7 @@ int main()
     }
 
     // Store original execution time in another vector
-    for(int i=0;i<n;i++)
+    for (int i = 0; i < n; i++)
     {
         copyExec.push_back(t[i].execTime);
     }
@@ -61,6 +62,7 @@ int main()
     {
         cout << "Processor " << j << ":" << endl;
         shortest = 0;
+
         while (n > 0)
         {
             // Check release time, and push executable tasks to the waiting queue
@@ -82,19 +84,22 @@ int main()
                 if (q[k].execTime < q[shortest].execTime)
                 {
                     shortest = k;
-                    isSwitch = true;
+                    isChange = true;
                 }
             }
             currTask = q[shortest].id;
 
             // Context switch
-            if (isSwitch == true)
+            if (isChange == true)
             {
-                
+
                 cout << currTime << endl;
-                cout << currTime << " Context Switch " << ++currTime << endl;
+                // If the previous task terminated and the next task haven't been started before, then do not need context switch
+                if (q[shortest].execTime != copyExec[currTask] || isEnd == false)
+                    cout << currTime << " Context Switch " << ++currTime << endl;
                 cout << currTime << " Task" << currTask << " ";
-                isSwitch = false;
+                isChange = false;
+                isEnd = false;
             }
             else
             {
@@ -110,7 +115,7 @@ int main()
             // Current task is finished
             if (q[shortest].execTime == 0)
             {
-                waitingTime[q[shortest].id] = currTime - q[shortest].releTime - copyExec[q[shortest].id];
+                waitingTime[currTask] = currTime - q[shortest].releTime - copyExec[currTask];
                 --n;
                 if (currTime <= q[shortest].deadline)
                 {
@@ -118,7 +123,8 @@ int main()
                 }
                 q.erase(q.begin() + shortest);
                 shortest = 0;
-                isSwitch = true;
+                isEnd = true;
+                isChange = true;
             }
         }
         cout << currTime << endl;
