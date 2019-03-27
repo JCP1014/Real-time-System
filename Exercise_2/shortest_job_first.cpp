@@ -1,6 +1,5 @@
 #include<cstdio>
 #include<iostream>
-#include<queue>
 #include<vector>
 using namespace std;
 
@@ -32,7 +31,7 @@ int main()
 	int currTime = 0;
 	int currTask = -1;
 	int taskTime = -1;
-	vector<int> restTask;
+	vector<bool> isReleased;
 	int shortest = 0;
 
 	for(int i=0; i<m; i++)
@@ -42,22 +41,19 @@ int main()
 	for(int i=0; i<n; i++)
 	{
 		cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> t[i].preempt >> t[i].type;
-		restTask.push_back(i);
+		isReleased.push_back(false);
 	}
 	for(int j=1; j<=m; j++)
 	{
 		cout << "Processor " << j << ":" << endl;
 		while(n>0)
 		{
-			for(int i=0; i<n; i++)
+			for (int i = 0; i < isReleased.size(); i++)
 			{
-				if(!restTask.empty())
+				if (isReleased[i] == false && t[i].releTime <= currTime)
 				{
-					if(t[restTask[i]].releTime <= currTime)
-					{
-						q.push_back(t[restTask[i]]);
-						restTask.erase(restTask.begin()+i);
-					}
+					q.push_back(t[i]);
+					isReleased[i] = true;
 				}
 			}
 			if(currTask < 0)
