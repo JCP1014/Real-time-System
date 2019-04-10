@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
+#include <iomanip>
 using namespace std;
 
 struct processor
@@ -41,6 +42,10 @@ int main()
 	vector<int> periods;
 	vector<int> newRele; // For updating release time
 	int hyperPeriod = 0;
+	vector<int> waitingTime;
+	double usedTime = 0;
+	double avg_wait = 0;
+	double cpu_util = 0;
 
 	for (int i = 0; i < m; i++)
 	{
@@ -50,6 +55,7 @@ int main()
 	{
 		cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> t[i].preempt >> t[i].type;
 		isReleased.push_back(false);
+		waitingTime.push_back(0);
 	}
 	/* Store original execution time in another vector */
 	for (int i = 0; i < n; i++)
@@ -95,8 +101,14 @@ int main()
 			}
 			--taskTime;
 			++currTime;
+			if (currTask > -1)
+			{
+				++usedTime;
+			}
+
 			if (taskTime == 0)
 			{
+				waitingTime[currTask] += currTime - t[currTask].releTime - copyExec[currTask];
 				cout << currTime << endl;
 				newRele[currTask] += periods[currTask];
 				memcpy(&t[currTask].releTime, &newRele[currTask], sizeof(int));
@@ -105,6 +117,16 @@ int main()
 				currTask = -1;
 			}
 		}
+		// Cauculate the average waiting time and CPU utilization
+		double total = 0;
+		for (int i = 0; i < waitingTime.size(); i++)
+		{
+			total += waitingTime[i];
+		}
+		avg_wait = total / waitingTime.size();
+		cpu_util = usedTime / hyperPeriod;
+		cout << "Average Waiting Time : " << fixed << setprecision(2) << avg_wait << endl;
+		cout << "CPU Utilization : " << fixed << setprecision(2) << cpu_util << endl;
 	}
 
 	return 0;
