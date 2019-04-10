@@ -80,9 +80,7 @@ int main()
 				cout << currTime << endl;
 				--n;
 				currTask = -1;
-			}
-
-				
+			}		
 		}
 	}
 
