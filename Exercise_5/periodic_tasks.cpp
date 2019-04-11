@@ -46,6 +46,7 @@ int main()
 	double usedTime = 0;
 	double avg_wait = 0;
 	double cpu_util = 0;
+	double total_jobs = 0;
 
 	for (int i = 0; i < m; i++)
 	{
@@ -62,7 +63,7 @@ int main()
 	{
 		copyExec.push_back(t[i].execTime); // Store original execution time in another vector
 		periods.push_back(t[i].period);	// Put periods of tasks in an array
-		newRele.push_back(t[i].releTime);
+		newRele.push_back(t[i].releTime);  // vector for updating release time of currentT task later
 	}
 
 	hyperPeriod = find_hyperPeriod(periods, n);
@@ -76,9 +77,10 @@ int main()
 			{
 				if (isReleased[i] == false && t[i].releTime <= currTime)
 				{
-					//cout << "i = " << i << "rele = " << t[i].releTime << endl;
 					q.push_back(t[i]);
-					isReleased[i] = true;
+					total_jobs += 1;
+					memcpy(&newRele[i],&t[i].releTime,  sizeof(int));
+					t[i].releTime += periods[i];
 				}
 			}
 			if (currTask < 0)
@@ -108,22 +110,19 @@ int main()
 
 			if (taskTime == 0)
 			{
-				waitingTime[currTask] += currTime - t[currTask].releTime - copyExec[currTask];
+				waitingTime[currTask] += currTime - newRele[currTask] - copyExec[currTask];
 				cout << currTime << endl;
-				newRele[currTask] += periods[currTask];
-				memcpy(&t[currTask].releTime, &newRele[currTask], sizeof(int));
 				memcpy(&t[currTask].execTime, &copyExec[currTask], sizeof(int));
-				isReleased[currTask] = false;
 				currTask = -1;
 			}
 		}
 		// Cauculate the average waiting time and CPU utilization
-		double total = 0;
+		double total_wait = 0;
 		for (int i = 0; i < waitingTime.size(); i++)
 		{
-			total += waitingTime[i];
+			total_wait += waitingTime[i];
 		}
-		avg_wait = total / waitingTime.size();
+		avg_wait = total_wait / total_jobs;
 		cpu_util = usedTime / hyperPeriod;
 		cout << "Average Waiting Time : " << fixed << setprecision(2) << avg_wait << endl;
 		cout << "CPU Utilization : " << fixed << setprecision(2) << cpu_util << endl;
