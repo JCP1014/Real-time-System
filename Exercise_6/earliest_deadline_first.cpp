@@ -78,29 +78,34 @@ int main()
             {
                 if (t[i].releTime <= currTime)
                 {
-                    memcpy(&newRele[i], &t[i].releTime, sizeof(int)); // Store release time of this job
-                    t[i].releTime += periods[i];                      // Updating release time for next job
-                    memcpy(&t[i].deadline, &t[i].releTime, sizeof(int));
+                    memcpy(&newRele[i], &t[i].releTime, sizeof(int));    // Store release time of this job
+                    t[i].releTime += periods[i];                         // Update release time for next job
+                    memcpy(&t[i].deadline, &t[i].releTime, sizeof(int)); // Update deadline of this job
                     q.push_back(t[i]);
-                    total_jobs += 1;                                  // Update number of jobs
+                    total_jobs += 1; // Update number of jobs
                 }
             }
 
             /* Choose the task whose dealine is the earliest */
             for (int k = 0; k < q.size(); k++)
             {
-                if (q[k].deadline <= q[earliest].deadline && q[k].id < q[earliest].id)
+                if (q[k].deadline < q[earliest].deadline) // If deadline are same, choose smallest id
+                {
+                    earliest = k;
+                    isChange = true;
+                }
+                else if (q[k].deadline == q[earliest].deadline && q[k].id < q[earliest].id) // If deadline are same, choose smallest id
                 {
                     earliest = k;
                     isChange = true;
                 }
             }
-            if (!q.empty())
+            if (!q.empty()) // There is a job executing
             {
                 currTask = q[earliest].id;
                 if (isChange == true)
                 {
-                    if (isEnd == false)
+                    if (isEnd == false) // If the job is preempted
                         cout << currTime << endl;
                     cout << currTime << " Task" << currTask << " ";
                     isChange = false;
@@ -123,7 +128,7 @@ int main()
                 cout << currTime << endl;
                 memcpy(&t[currTask].execTime, &copyExec[currTask], sizeof(int)); // Restore original execution time
                 q.erase(q.begin() + earliest);
-                earliest = 0;
+                earliest = 0; // Reset
                 isChange = true;
             }
         }

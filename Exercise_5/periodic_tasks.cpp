@@ -36,7 +36,6 @@ int main()
 	int currTime = 0;
 	int currTask = -1;
 	int taskTime = -1;
-	vector<bool> isReleased;
 	int shortest = 0;
 	vector<int> copyExec;
 	vector<int> periods;
@@ -55,7 +54,6 @@ int main()
 	for (int i = 0; i < n; i++)
 	{
 		cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> t[i].preempt >> t[i].type;
-		isReleased.push_back(false);
 		waitingTime.push_back(0);
 	}
 	/* Store original execution time in another vector */
@@ -73,19 +71,21 @@ int main()
 		cout << "Processor " << j << ":" << endl;
 		while (currTime < hyperPeriod)
 		{
-			for (int i = 0; i < isReleased.size(); i++)
+			/* Check release time, and push executable tasks to the waiting queue */
+			for (int i = 0; i < n; i++)
 			{
-				if (isReleased[i] == false && t[i].releTime <= currTime)
+				if (t[i].releTime <= currTime)
 				{
 					q.push_back(t[i]);
-					total_jobs += 1;
-					memcpy(&newRele[i],&t[i].releTime,  sizeof(int));
-					t[i].releTime += periods[i];
+					total_jobs += 1;	// Update number of jobs
+					memcpy(&newRele[i],&t[i].releTime,sizeof(int));	// Store release time of this job 
+					t[i].releTime += periods[i];	// Updating release time for next job
 				}
 			}
 			if (currTask < 0)
 			{
 				shortest = 0;
+				/* Choose the task whose execution time is the shortest */
 				for (int k = 0; k < q.size(); k++)
 				{
 					if (q[k].execTime < q[shortest].execTime)
@@ -105,14 +105,14 @@ int main()
 			++currTime;
 			if (currTask > -1)
 			{
-				++usedTime;
+				++usedTime;	// Increased time that CPU is executing tasks
 			}
-
+			/* Current task is finished */
 			if (taskTime == 0)
 			{
 				waitingTime[currTask] += currTime - newRele[currTask] - copyExec[currTask];
 				cout << currTime << endl;
-				memcpy(&t[currTask].execTime, &copyExec[currTask], sizeof(int));
+				memcpy(&t[currTask].execTime, &copyExec[currTask], sizeof(int));	// Restore original execution time
 				currTask = -1;
 			}
 		}
@@ -131,12 +131,14 @@ int main()
 	return 0;
 }
 
-int gcd(int a, int b)
+/* Find the greatest common divisor of twon numbers */
+int gcd(int a, int b)	
 {
 	if (b == 0)
 		return a;
 	return gcd(b, a % b);
 }
+/* Find the least common multiple of periods, that is hyper-period */
 int find_hyperPeriod(vector<int> &period, int n)
 {
 	int hyper = period[0];
