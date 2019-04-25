@@ -22,7 +22,7 @@ struct task
     int preempt;
     int type;
     int slackTime;
-    int preced;
+    vector<int> preced;
 };
 
 int gcd(int a, int b);
@@ -50,10 +50,10 @@ int main()
     double total_jobs = 0;
     bool isChange = true;
     bool isEnd = true;
-    bool isHold = false;
-    vector<int> exclude;
-    vector<bool> more;
-    int last = -1;
+    bool isHold = false;    // whether the task with higher precedence is in queue
+    vector<int> exclude;    // whose precedence is low
+    vector<bool> more;  // whether task is periodic or sporadic
+    int last = -1;  // Record the task at last second
 
     for (int i = 0; i < m; i++)
     {
@@ -62,17 +62,17 @@ int main()
     for (int i = 0; i < n; i++)
     {
         cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> t[i].preempt >> t[i].type;
-        t[i].preced = -1;
-        more.push_back(true);
-        waitingTime.push_back(0); // Initialize waiting time
+        // Initialize
+        more.push_back(true);   
+        waitingTime.push_back(0);
     }
-    cin >> c;
+    cin >> c;   // how many rules of precedence
     for (int i = 0; i < c; i++)
     {
-        int high;
-        int low;
+        int high;   // task with higher precedence
+        int low;    // task with lower precedence
         cin >> high >> low;
-        t[low].preced = high;
+        t[low].preced.push_back(high);
     }
 
     for (int i = 0; i < n; i++)
@@ -96,7 +96,7 @@ int main()
                 {
                     if (t[i].period == 0)
                     {
-                        more[i] = false;
+                        more[i] = false;    // Sporadic task should not be put into queue again
                     }
                     else
                     {
@@ -104,20 +104,19 @@ int main()
                         t[i].releTime += periods[i];                         // Update release time for next job
                         memcpy(&t[i].deadline, &t[i].releTime, sizeof(int)); // Update deadline of this job
                     }
-                    q.push_back(t[i]);
+                    q.push_back(t[i]);  // Push to waiting queue
                     total_jobs += 1; // Update number of jobs
                 }
             }
-
+            // Compute slack time
             for (int k = 0; k < q.size(); k++)
             {
                 q[k].slackTime = q[k].deadline - currTime - q[k].execTime;
-                //cout << q[k].id << " : " << q[k].slackTime << endl;
             }
             // Choose the task whose slack time is the least
             for (int k = 0; k < q.size(); k++)
             {
-                if (q[k].slackTime < q[least].slackTime) // If deadline are same, choose smallest id
+                if (q[k].slackTime < q[least].slackTime) 
                 {
                     least = k;
                     isChange = true;
@@ -128,13 +127,15 @@ int main()
                     isChange = true;
                 }
             }
-            //cout << least << endl;
+
+            // Check precedence
             do
             {
-                isHold = false;
+                isHold = false; // Reset
                 for (int i = 0; i < q.size(); i++)
                 {
-                    if (q[i].id == q[least].preced)
+                    // If task with higher precedence is still in waiting queue
+                    if (find(q[least].preced.begin(),q[least].preced.end(),q[i].id) != q[least].preced.end())
                     {
                         isHold = true;
                         exclude.push_back(q[least].id);
@@ -143,13 +144,13 @@ int main()
                         break;
                     }
                 }
-                if (isHold == true)
+                if (isHold == true) // Find another task with least slack time
                 {
                     for (int k = 0; k < q.size(); k++)
                     {
-                        if (find(exclude.begin(), exclude.end(), q[k].id) == exclude.end())
+                        if (find(exclude.begin(), exclude.end(), q[k].id) == exclude.end()) // q[k] isn't the task with lower precedence that we just gave up
                         {
-                            if (q[k].slackTime < q[least].slackTime) // If deadline are same, choose smallest id
+                            if (q[k].slackTime < q[least].slackTime)
                             {
                                 least = k;
                                 if (q[least].id != last)
@@ -164,7 +165,7 @@ int main()
                         }
                     }
                 }
-            } while (isHold);
+            } while (isHold);   // While still find the task with higher precedence in queue
 
             if (!q.empty()) // There is a job executing
             {
@@ -180,8 +181,8 @@ int main()
             }
 
             --q[least].execTime;
-            ++currTime;
-            last = q[least].id;
+            last = q[least].id; // Record the task at this second and go to next second
+            ++currTime; // Update time
             if (!q.empty())
             {
                 ++usedTime; // Increased time that CPU is executing tasks
