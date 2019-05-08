@@ -89,7 +89,7 @@ int main()
             /* Choose the task whose dealine is the earliest */
             for (int k = 0; k < q.size(); k++)
             {
-                if (q[k].deadline < q[earliest].deadline) // If deadline are same, choose smallest id
+                if (q[k].deadline < q[earliest].deadline) 
                 {
                     earliest = k;
                     isChange = true;
