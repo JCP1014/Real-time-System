@@ -37,35 +37,57 @@ void scheduling(int algo, int m, int n, struct processor p[], struct task t[]);
 
 int main()
 {   
+    FILE *fp;
     int m = 0, n = 0, c = 0;
-    freopen("input.txt", "r", stdin);
+    fp = freopen("input.txt", "r", stdin);
     //freopen("input(non-preemtable).txt", "r", stdin);
     cin >> m >> n;
     struct processor p[m];
     struct task t[n];
     for (int i = 0; i < m; i++)
     {
-        cin >> p[i].id >> p[i].ability;
+        cin >> p[i].id >> p[i].ability;                                                                     
     }
     for (int i = 0; i < n; i++)
     {
         cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> t[i].preempt >> t[i].type;
     }
+    cin >> c; // how many rules of precedence
+    for (int i = 0; i < c; i++)
+    {
+        int high; // task with higher precedence
+        int low;  // task with lower precedence
+        cin >> high >> low;
+        t[low].preced.push_back(high);
+    }
+
     cout << "_____With preemption:_____" << endl << endl;
     scheduling(SJF,m,n,p,t);
     scheduling(EDF,m,n,p,t);
     scheduling(LSTF,m,n,p,t);
     cout << endl;
-
-    freopen("input(non-preemtable).txt", "r", stdin);
+    //fclose(fp);
+    freopen("input2.txt", "r", stdin);
     cin >> m >> n;
     for (int i = 0; i < m; i++)
     {
         cin >> p[i].id >> p[i].ability;
     }
     for (int i = 0; i < n; i++)
-    {
+    {   int temp;
+        //cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> temp >> t[i].type;
+        //cout << temp << endl;
         cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> t[i].preempt >> t[i].type;
+        cout << t[i].preempt << endl;
+        t[i].preempt  = 0;
+    }
+    cin >> c; // how many rules of precedence
+    for (int i = 0; i < c; i++)
+    {
+        int high; // task with higher precedence
+        int low;  // task with lower precedence
+        cin >> high >> low;
+        t[low].preced.push_back(high);
     }
     cout << "_____No preemption:_____" << endl << endl;
     scheduling(SJF,m,n,p,t);
@@ -296,16 +318,18 @@ void scheduling(int algo, int m, int n, struct processor p[], struct task t[])
                 last = -1;
             }
         }
+        cout << endl;
         // Cauculate the average waiting time and hit rate
         double total = 0;
         for (int i = 0; i < waitingTime.size(); i++)
         {
             total += waitingTime[i];
+            cout << "wait " << i << ": " << waitingTime[i] << endl;
         }
         double avg = total / waitingTime.size();
         double hitRate = hit / waitingTime.size();
         cout << "Average Waiting Time : " << fixed << setprecision(2) << avg << endl;
-        cout << "Hit Rate : " << fixed << setprecision(2) << hitRate << endl;
+        cout << "Miss Rate : " << fixed << setprecision(2) << 1-hitRate << endl;
     }
     cout << endl;
 }
