@@ -40,7 +40,6 @@ int main()
     FILE *fp;
     int m = 0, n = 0, c = 0;
     fp = freopen("input.txt", "r", stdin);
-    //freopen("input(non-preemtable).txt", "r", stdin);
     cin >> m >> n;
     struct processor p[m];
     struct task t[n];
@@ -66,20 +65,17 @@ int main()
     scheduling(EDF,m,n,p,t);
     scheduling(LSTF,m,n,p,t);
     cout << endl;
-    //fclose(fp);
+    fclose(fp);
     freopen("input2.txt", "r", stdin);
     cin >> m >> n;
+
     for (int i = 0; i < m; i++)
     {
         cin >> p[i].id >> p[i].ability;
     }
     for (int i = 0; i < n; i++)
-    {   int temp;
-        //cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> temp >> t[i].type;
-        //cout << temp << endl;
+    {   
         cin >> t[i].id >> t[i].releTime >> t[i].execTime >> t[i].deadline >> t[i].period >> t[i].preempt >> t[i].type;
-        cout << t[i].preempt << endl;
-        t[i].preempt  = 0;
     }
     cin >> c; // how many rules of precedence
     for (int i = 0; i < c; i++)
