@@ -351,6 +351,7 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
                         for (int k = currTime; k < (currTime + t[best].execTime); k++)
                             table[k][1] = best;
                         currTime += t[best].execTime;
+                        frame_rest -= t[best].execTime;
                         waitingTime[best] = currTime - t[best].releTime - t[best].execTime;
                         ++total_jobs;
                         aperiodic.erase(aperiodic.begin() + index);
@@ -365,7 +366,7 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
                     ++currTime;
                 }
             }
-            forward+=frame;
+            forward += frame;
         }
 
         // Print the result of scheduling
