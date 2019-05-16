@@ -209,11 +209,11 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
                         // Choose the task whose slack time is the least
                         for (int k = 0; k < q.size(); k++)
                         {
-                            if (q[k].execTime < q[best].execTime)
+                            if (q[k].deadline < q[best].deadline)
                             {
                                 best = k;
                             }
-                            else if (q[k].execTime == q[best].execTime && q[k].id < q[best].id) // If deadline are same, choose smallest id
+                            else if (q[k].deadline == q[best].deadline && q[k].id < q[best].id) // If deadline are same, choose smallest id
                             {
                                 best = k;
                             }
@@ -244,7 +244,7 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
                             {
                                 if (find(exclude.begin(), exclude.end(), q[k].id) == exclude.end()) // q[k] isn't the task with lower precedence that we just gave up
                                 {
-                                    if (q[k].slackTime < q[best].slackTime)
+                                    if (q[k].deadline < q[best].deadline)
                                     {
                                         best = k;
                                         if (q[best].id != last)
@@ -252,7 +252,7 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
                                             isChange = true;
                                         }
                                     }
-                                    else if (q[k].slackTime == q[best].slackTime && q[k].id < q[best].id) // If deadline are same, choose smallest id
+                                    else if (q[k].deadline == q[best].deadline && q[k].id < q[best].id) // If deadline are same, choose smallest id
                                     {
                                         best = k;
                                         if (q[best].id != last)
@@ -327,7 +327,7 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
 
                 for (int j = 0; j < aperiodic.size(); j++)
                 {
-                    if (t[aperiodic[j]].releTime <= currTime && t[aperiodic[j]].execTime < t[best].execTime)
+                    if (t[aperiodic[j]].releTime <= currTime && t[aperiodic[j]].deadline < t[best].deadline)
                     {
                         best = aperiodic[j];
                         ready = true;
