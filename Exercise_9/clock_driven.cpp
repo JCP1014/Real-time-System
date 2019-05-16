@@ -107,7 +107,7 @@ int compute_frame(int n, struct task t[], int hyperPeriod)
     vector<int> possible;
     for (int i = 2; i < (hyperPeriod / 2); i++)
     {
-        if (hyperPeriod % i == 0)
+        if (hyperPeriod % i == 0 && i>=maxExec)
             possible.push_back(i);
     }
 
