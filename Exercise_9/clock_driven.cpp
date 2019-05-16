@@ -107,7 +107,7 @@ int compute_frame(int n, struct task t[], int hyperPeriod)
     vector<int> possible;
     for (int i = 2; i < (hyperPeriod / 2); i++)
     {
-        if (hyperPeriod % i == 0 && i>=maxExec)
+        if (hyperPeriod % i == 0 && i >= maxExec)
             possible.push_back(i);
     }
 
@@ -313,45 +313,59 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
             forward += frame;
         }
 
-        // Scheduling for aperiodic tasks 
+        // Scheduling for aperiodic tasks
         currTime = 0;
-        while (currTime < hyperPeriod && aperiodic.empty() == false)
+        forward = frame;
+        while (forward < hyperPeriod && aperiodic.empty() == false)
         {
-            if (table[currTime][1] == -1)
+            currTime = forward - frame;
+            frame_rest = 0;
+            for (int i = currTime; i < forward; i++)
             {
-                bool ready = false;
-                int index = 0;
-                best = aperiodic.at(index);
-                if (t[best].releTime <= currTime)
-                    ready = true;
-
-                for (int j = 0; j < aperiodic.size(); j++)
+                if (table[currTime][1] == -1)
                 {
-                    if (t[aperiodic[j]].releTime <= currTime && t[aperiodic[j]].deadline < t[best].deadline)
-                    {
-                        best = aperiodic[j];
-                        ready = true;
-                        index = j;
-                    }
+                    ++frame_rest;
                 }
-                if (ready == true)
+            }
+            while (currTime < forward)
+            {
+                if (table[currTime][1] == -1)
                 {
-                    for (int k = currTime; k < (currTime + t[best].execTime); k++)
-                        table[k][1] = best;
-                    currTime += t[best].execTime;
-                    waitingTime[best] = currTime - t[best].releTime - t[best].execTime;
-                    ++total_jobs;
-                    aperiodic.erase(aperiodic.begin() + index);
+                    bool ready = false;
+                    int index = 0;
+                    best = aperiodic.at(index);
+                    if (t[best].releTime <= currTime && t[best].execTime <= frame_rest)
+                        ready = true;
+
+                    for (int j = 0; j < aperiodic.size(); j++)
+                    {
+                        if (t[aperiodic[j]].releTime <= currTime && t[best].execTime <= frame_rest && t[aperiodic[j]].deadline < t[best].deadline)
+                        {
+                            best = aperiodic[j];
+                            ready = true;
+                            index = j;
+                        }
+                    }
+                    if (ready == true)
+                    {
+                        for (int k = currTime; k < (currTime + t[best].execTime); k++)
+                            table[k][1] = best;
+                        currTime += t[best].execTime;
+                        waitingTime[best] = currTime - t[best].releTime - t[best].execTime;
+                        ++total_jobs;
+                        aperiodic.erase(aperiodic.begin() + index);
+                    }
+                    else
+                    {
+                        ++currTime;
+                    }
                 }
                 else
                 {
                     ++currTime;
                 }
             }
-            else
-            {
-                ++currTime;
-            }
+            forward+=frame;
         }
 
         // Print the result of scheduling
@@ -359,13 +373,13 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
         bool keep = false;
         for (int i = 0; i < hyperPeriod; i++)
         {
-            if(table[i][1]>-1)
+            if (table[i][1] > -1)
             {
                 ++usedTime;
-                if(table[i][1]!=table[i+1][1])
-                {    
-                    if(keep==true)
-                    {    
+                if (table[i][1] != table[i + 1][1])
+                {
+                    if (keep == true)
+                    {
                         cout << table[i][2] << endl;
                         keep = false;
                     }
@@ -374,14 +388,15 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
                 }
                 else
                 {
-                    if(keep==false)
-                    {   cout << table[i][0] << " Task" << table[i][1] << " ";
+                    if (keep == false)
+                    {
+                        cout << table[i][0] << " Task" << table[i][1] << " ";
                         keep = true;
                     }
                 }
             }
         }
-        
+
         // Cauculate the average waiting time and CPU utilization
         double total_wait = 0;
         for (int i = 0; i < waitingTime.size(); i++)
