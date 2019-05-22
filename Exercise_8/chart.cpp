@@ -258,7 +258,29 @@ void scheduling(int algo, int m, int n, struct processor p[], struct task t[])
                     {
                         if (find(exclude.begin(), exclude.end(), q[k].id) == exclude.end()) // q[k] isn't the task with lower precedence that we just gave up
                         {
-                            if (q[k].slackTime < q[best].slackTime)
+                            int compare_item, temp_best;
+                            switch(algo)
+                            {
+                                case SJF:
+                                {
+                                    compare_item = q[k].execTime;
+                                    temp_best = q[best].execTime;
+                                    break;
+                                }
+                                case EDF:
+                                {
+                                    compare_item = q[k].deadline;
+                                    temp_best = q[best].deadline;
+                                    break;
+                                }
+                                case LSTF:
+                                {
+                                    compare_item = q[k].slackTime;
+                                    temp_best = q[best].slackTime;
+                                    break;
+                                }
+                            }
+                            if (compare_item < temp_best)
                             {
                                 best = k;
                                 if (q[best].id != last)
@@ -266,7 +288,7 @@ void scheduling(int algo, int m, int n, struct processor p[], struct task t[])
                                     isChange = true;
                                 }
                             }
-                            else if (q[k].slackTime == q[best].slackTime && q[k].id < q[best].id) // If deadline are same, choose smallest id
+                            else if (compare_item == temp_best && q[k].id < q[best].id) // If deadline are same, choose smallest id
                             {
                                 best = k;
                                 if (q[best].id != last)
@@ -322,8 +344,8 @@ void scheduling(int algo, int m, int n, struct processor p[], struct task t[])
             total += waitingTime[i];
             cout << "wait " << i << ": " << waitingTime[i] << endl;
         }
-        double avg = total / waitingTime.size();
-        double hitRate = hit / waitingTime.size();
+        double avg = total / total_jobs;
+        double hitRate = hit / total_jobs;
         cout << "Average Waiting Time : " << fixed << setprecision(2) << avg << endl;
         cout << "Miss Rate : " << fixed << setprecision(2) << 1-hitRate << endl;
     }
