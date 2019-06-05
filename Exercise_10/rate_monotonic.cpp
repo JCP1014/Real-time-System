@@ -183,11 +183,7 @@ void scheduling(int m, int n, struct processor p[], struct task t[], int hyperPe
                     total_jobs += 1;   // Update number of jobs
                 }
             }
-            // Compute slack time
-            for (int k = 0; k < q.size(); k++)
-            {
-                q[k].slackTime = q[k].deadline - currTime - q[k].execTime;
-            }
+
             if (isEnd == true || (isEnd == false && q[best].preempt == 1))
             {
                 // Choose the task whose slack time is the least
